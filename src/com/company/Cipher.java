@@ -3,12 +3,12 @@ package com.company;
 public abstract class Cipher {
 
     // метод  шифрования
-    public abstract String Encode(String openText, String key);
+    public abstract String cipher(String openText, String key);
     // метод дешифрования
-    public abstract String Decode(String cipherText, String key);
+    public abstract String decipher(String cipherText, String key);
 
     // создание матрицы
-    static char[][] CreateMatrix(char symb, int lineNumb, int colNumb) {
+    static char[][] createMatrix(char symb, int lineNumb, int colNumb) {
         char[][]  cipherMatrix = new char[lineNumb][colNumb];
         // заполнение всей матрицы пробелами
         for(int i=0; i < lineNumb; i++){
@@ -20,7 +20,7 @@ public abstract class Cipher {
     }
 
     // печать матрицы
-    static void PrintMatrix(char[][] matrix) {
+    static void printMatrix(char[][] matrix) {
 
         for(int i=0; i<matrix.length; i++){
             for(int j=0; j<matrix[i].length; j++){
