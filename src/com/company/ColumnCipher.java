@@ -1,156 +1,139 @@
 package com.company;
 
 
-// класс cтолбцового метода шифрования
-public  class ColumnCipher extends Cipher {
-
-    // алфавит
-    String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    // символ для заполнения матрицы
-    final char fillSymb = ' ';
-
-    // определение количества строк в матрице
-    private int getLineNumb(int textlength, int keyLenght) {
-        int lineNumb = 1;
-        return lineNumb += (textlength % keyLenght == 0)
-                ? (textlength / keyLenght) : (textlength / keyLenght + 1);
-    }
-
-    // запись ключа в 0 строку матрицы
-    private void writeKeyToMatrix(char[][] matrix, int colNumb, String key) {
-        for(int j=0; j<colNumb; j++){
-            matrix[0][j] = key.charAt(j);
-        }
-    }
-
-    // запись текста в матрицу с 1 строки по строкам
-    private void writeToMatrixInLine(String str, char[][] matrix, int lineNumb, int colNumb) {
-        int textIndex = 0;
-        for(int i=1; i < lineNumb; i++) {
-            for (int j = 0; j < colNumb; j++) {
-                if ( textIndex < str.length()) {
-                    matrix[i][j] = str.charAt(textIndex);
-                    textIndex++;
-                }
-            }
-        }
-    }
-
-    // получение шифра из матрицы по столбцам
-    private String getCipherFromMatrix(char[][] matrix, int lineNumb, int colNumb) {
-
-        String result = "";
-        for(int i=0; i < alphabet.length(); i++){
-            for(int j=0; j < colNumb; j++){
-                if (matrix[0][j] == alphabet.charAt(i)){
-                    for(int k=1; k<lineNumb; k++) {
-                        result += matrix[k][j];
-                    }
-                }
-            }
-        }
-        return result;
-    }
-
-    // запись текста в матрицу с 1 строки по столбцам
-    private void writeToMatrixInCol(String str, char[][] matrix, int lineNumb, int colNumb) {
-        int textIndex = 0;
-        // запись открытого текста в матрицу
-        for(int j=0; j < colNumb; j++){
-            for(int i=1; i< lineNumb; i++){
-                if ( textIndex < str.length()) {
-                    matrix[i][j] = str.charAt(textIndex);
-                    textIndex++;
-                }
-            }
-        }
-    }
-
-    // получение массива индексов ключа
-    private int[] getKeyIndex(char matrix[][], int colNumb) {
-
-        int[] keyArr = new int[colNumb];
-        int counter = 0;
-        for(int i=0; i < alphabet.length(); i++){
-            for(int j=0; j < colNumb; j++){
-                if (matrix[0][j] == alphabet.charAt(i)){
-                    keyArr[j] = counter;
-                    counter++;
-                }
-            }
-        }
-        return keyArr;
-    }
-
-    // перестановка столбцов для получения шифра
-    private char[][] matrixPermutation(char[][] matrix, int lineNumb, int colNumb, int keyArr[]) {
-
-        char[][] newMatrix = new char[lineNumb][colNumb];
-        for(int j=0; j< colNumb; j++){
-            for(int i=0; i<keyArr.length; i++){
-                if (j == keyArr[i]){
-                    for(int m=0; m<lineNumb; m++){
-                        newMatrix[m][i] = matrix[m][j];
-                    }
-                }
-            }
-        }
-        return newMatrix;
-    }
-
-    // получение открытого текста из матрицы по строкам
-    private String getOpenTextFromMatrix(char[][] matrix, int lineNumb, int colNumb) {
-
-        String result = "";
-        for(int i=1; i < lineNumb; i++){
-            for(int j=0;j < colNumb;j++) {
-                result += matrix[i][j];
-            }
-        }
-        return result;
-    }
+public class ColumnCipher extends Cipher {
 
     @Override
     public String cipher(String openText, String key) {
+        char[][] matrix = createCipherMatrix(openText, key);
+        System.out.println("Matrix before cipher: ");
+        printMatrix(matrix);
+        sortMatrix(matrix);
+        System.out.println("Matrix after cipher: ");
+        printMatrix(matrix);
 
-        // получение количества символов в ключе
-        int keyNumb = key.length();
-        // определение количества строк в матрице
-        int lineNumb = getLineNumb(openText.length(), keyNumb);
-        // создание матрицы для записи ключа и открытого текста
-        char[][]  cipherMatrix = createMatrix(fillSymb, lineNumb, keyNumb);
-        // запись ключа в матрицу
-        writeKeyToMatrix(cipherMatrix, keyNumb, key);
-        // запись открытого текста в матрицу по строкам
-        writeToMatrixInLine(openText, cipherMatrix, lineNumb, keyNumb);
-        System.out.println("Matrix before cipher:");
-        printMatrix(cipherMatrix);
-        // возврат шифра
-        return getCipherFromMatrix(cipherMatrix, lineNumb, keyNumb);
+        return getCipherText(matrix);
     }
-
 
     @Override
     public String decipher(String cipherText, String key) {
-        // получение количества символов в ключе
-        int keyNumb = key.length();
-        // определение количества строк в матрице
-        int lineNumb = getLineNumb(cipherText.length(), keyNumb);
-        // создание матрицы для записи ключа и открытого текста
-        char[][]  cipherMatrix = createMatrix(fillSymb, lineNumb, keyNumb);
-        // запись ключа в матрицу
-        writeKeyToMatrix(cipherMatrix, keyNumb, key);
-        // запись шифра в матрицу по столбцам
-        writeToMatrixInCol(cipherText, cipherMatrix, lineNumb, keyNumb);
-        System.out.println("Matrix before decipher:");
-        printMatrix(cipherMatrix);
-        // получение массива индексов ключа
-        int[] keyArr = getKeyIndex(cipherMatrix, keyNumb);
-        // перестановка столбцов в матрице по индексам  ключа
-        cipherMatrix = matrixPermutation(cipherMatrix, lineNumb, keyNumb, keyArr);
-        System.out.println("Matrix after decipher:");
-        printMatrix(cipherMatrix);
-        // возврат расшифрованного текста
-        return  getOpenTextFromMatrix(cipherMatrix, lineNumb, keyNumb);
+
+        char[][] matrix = createDecipherMatrix(cipherText, key);
+        printMatrix(matrix);
+
+        return convertDecryptionMatrix(matrix);
+    }
+
+    // создание матрицы для шифрации
+    private char[][] createCipherMatrix(String openText, String key) {
+
+        int colNumb = key.length();
+        int rowNumb = (openText.length() - 1) / colNumb + 2;
+
+        char[][] matrix = new char[rowNumb][colNumb];
+
+        // заполнение первой строки ключем
+        System.arraycopy(key.toCharArray(), 0, matrix[0], 0, colNumb);
+
+        // заполнение матрицы открытым текстом
+        for (int i = 0; i < openText.length(); i++) {
+            int m = i / colNumb + 1;
+            int n = i % colNumb;
+
+            matrix[m][n] = openText.charAt(i);
+        }
+
+        return matrix;
+    }
+
+    // получение зашифрованной строки из матрицы
+    private String getCipherText(char[][] matrix) {
+
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < matrix[0].length; i++) {
+            for (int j = 1; j < matrix.length; j++) {
+                result.append(matrix[j][i]);
+            }
+        }
+
+        return result.toString();
+    }
+
+    //  сортировка матрицы
+    private void sortMatrix(char[][] matrix) {
+
+        for (int i = 0; i < matrix[0].length - 1; i++) {
+            for (int j = (matrix[0].length - 1); j > i; j--) {
+                if (matrix[0][j - 1] > matrix[0][j]) {
+                    for (int k = 0; k < matrix.length; k++) {
+
+                        char temp = matrix[k][j - 1];
+                        matrix[k][j - 1] = matrix[k][j];
+                        matrix[k][j] = temp;
+                    }
+                }
+            }
+        }
+    }
+
+    // создание матрицы для шифрации
+    private char[][] createDecipherMatrix(String cipherText, String key) {
+
+        int colNumb = key.length();
+        int rowNumb = (cipherText.length() - 1) / colNumb + 2;
+
+        char[][] matrix = new char[rowNumb][colNumb];
+
+        // заполнение первой строки ключем
+        System.arraycopy(key.toCharArray(), 0, matrix[0], 0, colNumb);
+
+        // заполнение матрицы шифром
+        int fullBlocks = cipherText.length() % colNumb;
+        int iterator = 0;
+
+        for (int i = 0; i < colNumb; i++) {
+            int col = getMinIndex(matrix);
+
+            int blockLen = col < fullBlocks ? rowNumb : rowNumb - 1;
+
+            for (int j = 1; j < blockLen; j++) {
+                matrix[j][col] = cipherText.charAt(iterator);
+                iterator++;
+            }
+        }
+
+        return matrix;
+    }
+
+    // получение минимального индекса
+    private int getMinIndex(char[][] mat) {
+
+        int minId = -1;
+        int minVal = 0;
+
+        for (int i = 0; i < mat[0].length; i++) {
+            if (mat[1][i] == '\u0000') {
+                if (minId == -1 || mat[0][i] < minVal ) {
+                    minId = i;
+                    minVal = mat[0][minId];
+                }
+            }
+        }
+
+        return minId;
+    }
+
+    private String convertDecryptionMatrix(char[][] mat) {
+
+        StringBuilder str = new StringBuilder();
+
+        for (int i = 1; i < mat.length; i++) {
+            for (int j = 0; j < mat[i].length; j++) {
+                str.append(mat[i][j]);
+            }
+        }
+
+        return str.toString();
     }
 }
