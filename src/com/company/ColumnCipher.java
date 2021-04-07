@@ -89,17 +89,17 @@ public class ColumnCipher extends Cipher {
         System.arraycopy(key.toCharArray(), 0, matrix[0], 0, colNumb);
 
         // заполнение матрицы шифром
-        int fullBlocks = cipherText.length() % colNumb;
-        int iterator = 0;
+        int fullColNumb = cipherText.length() % colNumb;
+        int counter = 0;
 
         for (int i = 0; i < colNumb; i++) {
-            int col = getMinIndex(matrix);
+            int col = getColIndex(matrix);
 
-            int blockLen = col < fullBlocks ? rowNumb : rowNumb - 1;
+            int blockLen = col < fullColNumb ? rowNumb : rowNumb - 1;
 
             for (int j = 1; j < blockLen; j++) {
-                matrix[j][col] = cipherText.charAt(iterator);
-                iterator++;
+                matrix[j][col] = cipherText.charAt(counter);
+                counter++;
             }
         }
 
@@ -107,7 +107,7 @@ public class ColumnCipher extends Cipher {
     }
 
     // получение минимального индекса
-    private int getMinIndex(char[][] mat) {
+    private int getColIndex(char[][] mat) {
 
         int minId = -1;
         int minVal = 0;

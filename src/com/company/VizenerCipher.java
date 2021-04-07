@@ -10,7 +10,7 @@ public class VizenerCipher extends Cipher {
     public String cipher(String openText, String key) {
 
         char[][] cipherTable = genTable();
-        // printMatrix(cipherTable);
+        printMatrix(cipherTable);
         key = createNewKey(openText, key);
         //System.out.println();
         System.out.println(openText);
